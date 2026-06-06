@@ -1,32 +1,32 @@
-# DesagioAPITarefas
+# DesafioAPITarefas
 Repositório para controle do Desafio de criação de uma API e aplicação para controle e consulta de tarefas.
 
 ----------------------------------------------------------------------------------------------------------
 Projeto desenvolvido como prova técnica para vaga de Desenvolvedor Delphi.
 A solução é composta por dois módulos: 
 
-1 - Backend(API Rest): Serviço desenvolvido em Delphi, com framework Horse. Responsável por gerenciar tarefas e disponbilizar os endpoints Rest;
+1 - <b>Backend(API Rest):</b> Serviço desenvolvido em Delphi, com framework Horse. Responsável por gerenciar tarefas e disponbilizar os endpoints Rest;
 
-2 - Frontend(VCL): Aplicação VCL responsável por consumir a API e gerenciar as tarefas através dos endpoints disponibilizados.
+2 - <b>Frontend(VCL):</b> Aplicação VCL responsável por consumir a API e gerenciar as tarefas através dos endpoints disponibilizados.
 
----Tecnologias Utilizadas---
-Backend:
-.Delphi
-.Horse
-.FireDAC
-.SQL Server
-.Json
+<b>Tecnologias Utilizadas</b>  
+<b>Backend:</b>  
+.Delphi  
+.Horse  
+.FireDAC  
+.SQL Server  
+.Json  
 .API Key Auth
 
-Frontend:
-.Delphi VCL
-.RR4D
-.Json
+<b>Frontend:</b>  
+.Delphi VCL  
+.RR4D  
+.JSON
 
 ----------------------------------------------------------------------------------------------------------
-Padrões de Projeto Utilizados
+<b>Padrões de Projeto Utilizados</b>
 
-.Factory: Responsável pela criação e gerenciamento das conexões com o bd
-.Repository: Responsável pela abstração do acesso aos dados
-.Service Layer: Responsável pelas regras de negócio da applicação
-.DTO: Utilizado para transferência de dados entre as camadas
+<b>.Factory:</b> Responsável pela criação e gerenciamento das conexões com o bd  
+<b>.Repository:</b> Responsável pela abstração do acesso aos dados  
+<b>.Service Layer:</b> Responsável pelas regras de negócio da applicação  
+<b>.DTO:</b> Utilizado para transferência de dados entre as camadas  
