@@ -4,7 +4,11 @@ program gerenciadorTarefas;
 
 {$R *.res}
 
-uses Horse;
+uses
+  Horse,
+  AppConfig in 'src\Config\AppConfig.pas',
+  Entidade.Tarefa in 'src\Domain\Entidade.Tarefa.pas',
+  Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas';
 
 begin
   THorse.Get('ping',

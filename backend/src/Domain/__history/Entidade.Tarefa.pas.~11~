@@ -1,0 +1,29 @@
+unit Entidade.Tarefa;
+
+interface
+
+uses
+  System.SysUtils, Enums.Tarefa;
+
+type
+  TTarefa = class
+  private
+    FId: Integer;
+    FTitulo: string;
+    FDescricao: string;
+    FPrioridade: Integer;
+    FStatus: TStatusTarefa;
+    FDataCriacao: TDateTime;
+    FDataConclusao: TDateTime;
+  public
+    property
+    property
+    property
+    property
+    property
+    property
+    property
+
+implementation
+
+end.

@@ -1,0 +1,14 @@
+unit Enums.Tarefa;
+
+interface
+
+type
+  TStatusTarefa = (stPendente, stEmAndamento, stConcluida, stCancelada);
+
+function StatusToString(AStatus : TStatusTarefa): string;
+function StringToStatus(const AValue: string): TStatusTarefa;
+function StatusValido(const AValue: string): Boolean;
+
+implementation
+
+end.

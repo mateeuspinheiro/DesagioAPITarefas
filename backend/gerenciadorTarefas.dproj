@@ -106,6 +106,9 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="src\Config\AppConfig.pas"/>
+        <DCCReference Include="src\Domain\Entidade.Tarefa.pas"/>
+        <DCCReference Include="src\Domain\Enums.Tarefa.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

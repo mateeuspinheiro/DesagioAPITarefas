@@ -1,0 +1,12 @@
+unit Entidade.Tarefa;
+
+interface
+
+uses
+  System.SysUtils, Enums.Tarefa;
+
+  TTarefa = class;
+
+implementation
+
+end.

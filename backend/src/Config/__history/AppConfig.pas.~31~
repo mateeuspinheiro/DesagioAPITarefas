@@ -1,0 +1,106 @@
+{
+  Arquvio de configuracao da API.
+  Le o config.ini e disponibiliza porta, API Key e dados de conexao SQL Server.
+}
+
+unit AppConfig;
+
+interface
+
+uses  System.SysUtils, System.IniFiles;
+
+type
+  TAppConfig = class
+  private
+    class var Finstance: TAppConfig;
+    class function  ConfiguracaoPath : string; static;
+    constructor create;
+  public
+    class function Instance: TAppConfig; static;
+      destructor Destroy; override;
+
+      Port: Integer;
+      ApiKey: string;
+      DbServer: string;
+      DbDatabase: string;
+      DbUser: string;
+      DbPassWord: string;
+      DbOsAuth: Boolean;
+
+      procedure Load;
+      function ConnectionString: string;
+
+  end;
+
+implementation
+
+constructor TAppConfig.create;
+begin
+  inherited;
+  Port := 9000;
+  ApiKey := 'desafio-tarefas-api-key';
+  DbServer := 'localhost';
+  DbDatabase := 'GerenciadorTarefas';
+  DbUser := 'sa';
+  DbPassWord := '';
+  DbOsAuth := false;
+end;
+
+destructor TAppConfig.Destroy;
+begin
+  Finstance := nil;
+  inherited;
+end;
+
+class function TAppConfig.ConfiguracaoPath: string;
+begin
+ Result := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'config.ini';
+end;
+
+class function TAppConfig.Instance: TAppConfig;
+begin
+  if not Assigned(Finstance) then
+  begin
+    Finstance := TAppConfig.create;
+    Finstance.Load;
+  end;
+   Result := Finstance;
+end;
+
+procedure TAppConfig.Load;
+var
+  Lini : TIniFile;
+  Lpath : string;
+begin
+  Lpath := ConfiguracaoPath;
+  if not FileExists(Lpath) then
+  Exit;
+
+  Lini := TIniFile.Create(Lpath);
+  try
+    Port := Lini.ReadInteger('Server', 'Port', Port);
+    ApiKey := Lini.ReadString('Server', 'ApiKey', ApiKey);
+    DbServer := Lini.ReadString('Database', 'Server', DbServer);
+    DbDatabase := Lini.ReadString('Datavase', 'Server', DbDatabase);
+    DbUser := Lini.ReadString('Database', 'User', DbUser);
+    DbPassWord := Lini.ReadString('Database', 'Password', DbPassWord);
+    DbOsAuth := Lini.ReadBool('Datbase', 'OsAutenth', DbOsAuth);
+  finally
+    Lini.Free;
+  end;
+end;
+
+function TAppConfig.ConnectionString: string;
+begin
+  if DbOsAuth then
+    Result := Format(
+      'DriverID=MSSQL;Server=%s;Database=%s;OS Authent=Yes;',
+        [DbServer, DbDatabase])
+  else
+    Result := Format(
+      'DriverID=MSSQL;Server=%s;Database=%s;User_Name=%s;Password=%s;',
+        [DbServer,DbDatabase,DbUser,DbPassWord]);
+end;
+
+end.
+
