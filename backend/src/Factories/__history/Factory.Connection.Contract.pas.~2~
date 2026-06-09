@@ -1,0 +1,10 @@
+unit Factory.Connection.Contract;
+
+interface
+
+uses
+  FireDAC.Comp.Client;
+
+implementation
+
+end.

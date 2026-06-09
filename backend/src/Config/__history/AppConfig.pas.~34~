@@ -1,3 +1,8 @@
+{
+  Arquvio de configuração da API.
+  Le o config.ini e disponibiliza porta, API Key e dados de conexao SQL Server.
+}
+
 unit AppConfig;
 
 interface
@@ -11,20 +16,18 @@ type
     class function  ConfiguracaoPath : string; static;
     constructor create;
   public
+    Port: Integer;
+    ApiKey: string;
+    DbServer: string;
+    DbDatabase: string;
+    DbUser: string;
+    DbPassWord: string;
+    DbOsAuth: Boolean;
+
     class function Instance: TAppConfig; static;
-      destructor Destroy; override;
-
-      Port: Integer;
-      ApiKey: string;
-      DbServer: string;
-      DbDatabase: string;
-      DbUser: string;
-      DbPassWord: string;
-      DbOsAuth: Boolean;
-
-      procedure Load;
-      function ConnectionString: string;
-
+    destructor Destroy; override;
+    procedure Load;
+    function ConnectionString: string;
   end;
 
 implementation
@@ -90,7 +93,12 @@ begin
   if DbOsAuth then
     Result := Format(
       'DriverID=MSSQL;Server=%s;Database=%s;OS Authent=Yes;',
-        [DbServer, DbDatabase];
-
+        [DbServer, DbDatabase])
+  else
+    Result := Format(
+      'DriverID=MSSQL;Server=%s;Database=%s;User_Name=%s;Password=%s;',
+        [DbServer,DbDatabase,DbUser,DbPassWord]);
 end;
+
+end.
 

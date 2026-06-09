@@ -1,5 +1,5 @@
 {
-  Singleton de configuracao da API.
+  Arquvio de configuração da API.
   Le o config.ini e disponibiliza porta, API Key e dados de conexao SQL Server.
 }
 
@@ -16,20 +16,21 @@ type
     class function  ConfiguracaoPath : string; static;
     constructor create;
   public
+    Port: Integer;
+    ApiKey: string;
+    DbServer: string;
+    DbDatabase: string;
+    DbUser: string;
+    DbPassWord: string;
+    DbOsAuth: Boolean;
+    DbEncrypt: Boolean;
+    DbTrustServerCertificate: Boolean;
+    DbOdbcDriver: string;
+
     class function Instance: TAppConfig; static;
-      destructor Destroy; override;
-
-      Port: Integer;
-      ApiKey: string;
-      DbServer: string;
-      DbDatabase: string;
-      DbUser: string;
-      DbPassWord: string;
-      DbOsAuth: Boolean;
-
-      procedure Load;
-      function ConnectionString: string;
-
+    destructor Destroy; override;
+    procedure Load;
+    function OdbcConnectionString: string;
   end;
 
 implementation
@@ -41,9 +42,12 @@ begin
   ApiKey := 'desafio-tarefas-api-key';
   DbServer := 'localhost';
   DbDatabase := 'GerenciadorTarefas';
-  DbUser := 'sa';
+  DbUser := '';
   DbPassWord := '';
-  DbOsAuth := false;
+  DbOSAuth := True;
+  DbEncrypt := False;
+  DbTrustServerCertificate := True;
+  DbOdbcDriver := 'ODBC Driver 17 for SQL Server';
 end;
 
 destructor TAppConfig.Destroy;
@@ -74,14 +78,18 @@ var
 begin
   Lpath := ConfiguracaoPath;
   if not FileExists(Lpath) then
-  Exit;
+   begin
+    Writeln('AVISO: config.ini nao encontrado em: ', LPath);
+    Writeln('       Usando valores padrao. Copie config.ini para a pasta do executavel.');
+    Exit;
+   end;
 
   Lini := TIniFile.Create(Lpath);
   try
     Port := Lini.ReadInteger('Server', 'Port', Port);
     ApiKey := Lini.ReadString('Server', 'ApiKey', ApiKey);
     DbServer := Lini.ReadString('Database', 'Server', DbServer);
-    DbDatabase := Lini.ReadString('Datavase', 'Server', DbDatabase);
+    DbDatabase := Lini.ReadString('Database', 'Database', DbDatabase);
     DbUser := Lini.ReadString('Database', 'User', DbUser);
     DbPassWord := Lini.ReadString('Database', 'Password', DbPassWord);
     DbOsAuth := Lini.ReadBool('Datbase', 'OsAutenth', DbOsAuth);
@@ -90,7 +98,7 @@ begin
   end;
 end;
 
-function TAppConfig.ConnectionString: string;
+function TAppConfig.OdbcConnectionString: string;
 begin
   if DbOsAuth then
     Result := Format(

@@ -1,0 +1,7 @@
+unit Factory.Connection.Contract;
+
+interface
+
+implementation
+
+end.

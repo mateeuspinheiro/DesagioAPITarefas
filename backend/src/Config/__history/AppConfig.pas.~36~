@@ -1,6 +1,8 @@
-{Arquivo para persistir o modo de conexão da API no banco de dados,
-onde ao final é verificado se o Auth está válido e persiste a comunicação, caso
-não esteja, são buscadas as informações de login para renovar a conexão}
+{
+  Arquvio de configuração da API.
+  Le o config.ini e disponibiliza porta, API Key e dados de conexao SQL Server.
+}
+
 unit AppConfig;
 
 interface
@@ -14,20 +16,21 @@ type
     class function  ConfiguracaoPath : string; static;
     constructor create;
   public
+    Port: Integer;
+    ApiKey: string;
+    DbServer: string;
+    DbDatabase: string;
+    DbUser: string;
+    DbPassWord: string;
+    DbOsAuth: Boolean;
+    DbEncrypt: Boolean;
+    DbTrustServerCertificate: Boolean;
+    DbOdbcDriver: string;
+
     class function Instance: TAppConfig; static;
-      destructor Destroy; override;
-
-      Port: Integer;
-      ApiKey: string;
-      DbServer: string;
-      DbDatabase: string;
-      DbUser: string;
-      DbPassWord: string;
-      DbOsAuth: Boolean;
-
-      procedure Load;
-      function ConnectionString: string;
-
+    destructor Destroy; override;
+    procedure Load;
+    function ConnectionString: string;
   end;
 
 implementation
@@ -72,7 +75,11 @@ var
 begin
   Lpath := ConfiguracaoPath;
   if not FileExists(Lpath) then
-  Exit;
+   begin
+    Writeln('AVISO: config.ini nao encontrado em: ', LPath);
+    Writeln('       Usando valores padrao. Copie config.ini para a pasta do executavel.');
+    Exit;
+   end;
 
   Lini := TIniFile.Create(Lpath);
   try

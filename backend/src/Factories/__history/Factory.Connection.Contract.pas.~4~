@@ -1,0 +1,17 @@
+{Abstration Factory - Solicitada}
+unit Factory.Connection.Contract;
+
+interface
+
+uses
+  FireDAC.Comp.Client;
+
+type
+  IConnectionFactory = interface
+    ['{A3B5E8F1-2C4D-4E6A-9B0C-1D2E3F4A5B6C}']
+    function CreateConnection : TFDConnection;
+  end;
+
+implementation
+
+end.

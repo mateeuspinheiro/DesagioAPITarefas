@@ -1,21 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2026/06/05 23:24:34.000.141,C:\Users\Pinheiro\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\gerenciadorTarefas.dproj</Transaction>
-    <Transaction>2026/06/06 20:25:12.940,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
-    <Transaction>2026/06/06 20:26:15.058,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Config\AppConfig.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
-    <Transaction>2026/06/06 22:05:25.202,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
-    <Transaction>2026/06/06 22:06:05.327,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Entidade.Tarefas.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
-    <Transaction>2026/06/06 22:06:19.164,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
-    <Transaction>2026/06/06 22:06:31.295,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Enums.Tarefas.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
-    <Transaction>2026/06/06 22:06:46.604,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Entidade.Tarefa.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Entidade.Tarefas.pas</Transaction>
-    <Transaction>2026/06/06 22:06:51.742,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Enums.Tarefa.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Enums.Tarefas.pas</Transaction>
-  </Transactions>  <ProjectSortOrder AutoSort="0" SortType="0">
+    <Transaction>2026/06/05 23:24:34.000.141,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\gerenciadorTarefas.dproj=C:\Users\Pinheiro\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2026/06/06 20:25:12.000.940,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+    <Transaction>2026/06/06 20:26:15.000.058,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Config\AppConfig.pas</Transaction>
+    <Transaction>2026/06/06 22:05:25.000.202,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+    <Transaction>2026/06/06 22:06:05.000.327,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Entidade.Tarefas.pas</Transaction>
+    <Transaction>2026/06/06 22:06:19.000.164,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+    <Transaction>2026/06/06 22:06:31.000.295,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Enums.Tarefas.pas</Transaction>
+    <Transaction>2026/06/06 22:06:46.000.604,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Entidade.Tarefas.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Entidade.Tarefa.pas</Transaction>
+    <Transaction>2026/06/06 22:06:51.000.742,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Enums.Tarefas.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Domain\Enums.Tarefa.pas</Transaction>
+    <Transaction>2026/06/09 19:42:42.328,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+    <Transaction>2026/06/09 19:43:23.248,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Factories\Factory.Connection.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+    <Transaction>2026/06/09 19:44:32.081,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+    <Transaction>2026/06/09 19:45:02.577,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\src\Factories\Factory.Connection.Contract.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\backend\Unit1.pas</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
     <File Path="src"/>
     <File Path="src\Config"/>
     <File Path="src\Config\AppConfig.pas"/>
     <File Path="src\Domain"/>
     <File Path="src\Domain\Entidade.Tarefa.pas"/>
     <File Path="src\Domain\Enums.Tarefa.pas"/>
+    <File Path="src\Factories"/>
+    <File Path="src\Factories\Factory.Connection.pas"/>
+    <File Path="src\Factories\Factory.Connection.Contract.pas"/>
   </ProjectSortOrder>
 </BorlandProject>

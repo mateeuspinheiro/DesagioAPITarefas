@@ -23,11 +23,14 @@ type
     DbUser: string;
     DbPassWord: string;
     DbOsAuth: Boolean;
+    DbEncrypt: Boolean;
+    DbTrustServerCertificate: Boolean;
+    DbOdbcDriver: string;
 
     class function Instance: TAppConfig; static;
     destructor Destroy; override;
     procedure Load;
-    function ConnectionString: string;
+    function OdbcConnectionString: string;
   end;
 
 implementation
@@ -39,9 +42,12 @@ begin
   ApiKey := 'desafio-tarefas-api-key';
   DbServer := 'localhost';
   DbDatabase := 'GerenciadorTarefas';
-  DbUser := 'sa';
+  DbUser := '';
   DbPassWord := '';
-  DbOsAuth := false;
+  DbOSAuth := True;
+  DbEncrypt := False;
+  DbTrustServerCertificate := True;
+  DbOdbcDriver := 'ODBC Driver 17 for SQL Server';
 end;
 
 destructor TAppConfig.Destroy;
@@ -72,32 +78,52 @@ var
 begin
   Lpath := ConfiguracaoPath;
   if not FileExists(Lpath) then
-  Exit;
+   begin
+    Writeln('AVISO: config.ini nao encontrado em: ', LPath);
+    Writeln('       Usando valores padrao. Copie config.ini para a pasta do executavel.');
+    Exit;
+   end;
 
   Lini := TIniFile.Create(Lpath);
   try
     Port := Lini.ReadInteger('Server', 'Port', Port);
     ApiKey := Lini.ReadString('Server', 'ApiKey', ApiKey);
     DbServer := Lini.ReadString('Database', 'Server', DbServer);
-    DbDatabase := Lini.ReadString('Datavase', 'Server', DbDatabase);
+    DbDatabase := Lini.ReadString('Database', 'Database', DbDatabase);
     DbUser := Lini.ReadString('Database', 'User', DbUser);
     DbPassWord := Lini.ReadString('Database', 'Password', DbPassWord);
     DbOsAuth := Lini.ReadBool('Datbase', 'OsAutenth', DbOsAuth);
+    DbEncrypt := LIni.ReadBool('Database', 'Encrypt', DbEncrypt);
+    DbTrustServerCertificate := LIni.ReadBool('Database', 'TrustServerCertificate', DbTrustServerCertificate);
+    DbOdbcDriver := LIni.ReadString('Database', 'OdbcDriver', DbOdbcDriver);
   finally
     Lini.Free;
   end;
 end;
 
-function TAppConfig.ConnectionString: string;
+function TAppConfig.OdbcConnectionString: string;
+var
+  LEncrypt: string;
+  LTrust: string;
 begin
+  if DbEncrypt then
+    LEncrypt := 'Encrypt=Yes'
+  else
+    LEncrypt := 'Encrypt=No';
+
+  if DbTrustServerCertificate then
+    LTrust := 'TrustServerCertificate=Yes'
+  else
+    LTrust := 'TrustServerCertificate=No';
+
   if DbOsAuth then
     Result := Format(
-      'DriverID=MSSQL;Server=%s;Database=%s;OS Authent=Yes;',
-        [DbServer, DbDatabase])
+      'Driver={%s};Server=%s;Database=%s;Trusted_Connection=Yes;%s;%s;',
+      [DbOdbcDriver, DbServer, DbDatabase, LEncrypt, LTrust])
   else
     Result := Format(
-      'DriverID=MSSQL;Server=%s;Database=%s;User_Name=%s;Password=%s;',
-        [DbServer,DbDatabase,DbUser,DbPassWord]);
+      'Driver={%s};Server=%s;Database=%s;UID=%s;PWD=%s;%s;%s;',
+      [DbOdbcDriver, DbServer, DbDatabase, DbUser, DbPassword, LEncrypt, LTrust]);
 end;
 
 end.

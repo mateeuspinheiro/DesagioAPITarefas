@@ -6,14 +6,9 @@ program gerenciadorTarefas;
 
 uses
   Horse,
-  FireDAC.DApt,
-  FireDAC.Stan.Async,
-  FireDAC.Phys.ODBC,
   AppConfig in 'src\Config\AppConfig.pas',
   Entidade.Tarefa in 'src\Domain\Entidade.Tarefa.pas',
-  Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas',
-  Factory.Connection in 'src\Factories\Factory.Connection.pas',
-  Factory.Connection.Contract in 'src\Factories\Factory.Connection.Contract.pas';
+  Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas';
 
 begin
   try
@@ -26,10 +21,13 @@ begin
 
     THorse.Listen(TAppConfig.Instance.Port);
   except
-    on E: Exception do
-    begin
-     Writeln(E.ClassName ,'', E.message);
-     Readln;
-    end;
+
   end;
+  THorse.Get('ping',
+    procedure(Req: THorseRequest; Res: THorseResponse)
+    begin
+      Res.Send('pong');
+    end);
+
+  THorse.Listen(9000);
 end.

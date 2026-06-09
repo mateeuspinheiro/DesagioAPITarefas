@@ -1,0 +1,41 @@
+{Implementação real da interface de conexão baseando na abstract factoty}
+unit Factory.Connection;
+
+interface
+
+uses
+  FireDAC.Comp.Client,
+  FireDAC.Stan.Def,
+  Factory.Connection.Contract,
+  AppConfig;
+
+type
+    TFireDACConnectionFactory = class(TInterfacedObject, IConnectionFactory)
+  private
+    function CreateConnection: TFDConnection;
+  public
+
+  end;
+
+implementation
+
+uses
+  System.SysUtils,
+  FireDAC.Phys.ODBC;
+
+function TFireDACConnectionFactory.CreateConnection: TFDConnection;
+var
+  LCfg: TAppConfig;
+begin
+  LCfg := TAppConfig.Instance;
+  Result := TFDConnection.Create(nil);
+  try
+    Result.Params.Clear;
+    Result.Params.DriverID := 'ODBC';
+    Result.Params.Add('ODBCAdvanced=' + LCfg.OdbcConnectionString);
+  except
+     Result.Free;
+     raise;
+  end;
+end;
+end.
