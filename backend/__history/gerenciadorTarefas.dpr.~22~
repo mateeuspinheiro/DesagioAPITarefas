@@ -11,7 +11,9 @@ uses
   FireDAC.Phys.ODBC,
   AppConfig in 'src\Config\AppConfig.pas',
   Entidade.Tarefa in 'src\Domain\Entidade.Tarefa.pas',
-  Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas';
+  Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas',
+  Factory.Connection in 'src\Factories\Factory.Connection.pas',
+  Factory.Connection.Contract in 'src\Factories\Factory.Connection.Contract.pas';
 
 begin
   try
@@ -27,6 +29,7 @@ begin
     on E: Exception do
     begin
      Writeln(E.ClassName ,'', E.message);
+     Readln;
     end;
   end;
 end.

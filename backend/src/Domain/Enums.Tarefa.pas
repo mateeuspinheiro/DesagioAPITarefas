@@ -34,9 +34,9 @@ begin
   LValue := Trim(AValue);
   if SameText(LValue, 'Pendente') then
     Exit(stPendente);
-  if SameText(LValue, 'Em Andamento') then
+  if SameText(LValue, 'EmAndamento') then
     Exit(stEmAndamento);
-  if SameText(LValue, 'Concluída') then
+  if SameText(LValue, 'Concluida') then
     Exit(stConcluida);
   if SameText(LValue, 'Cancelada') then
     Exit(stCancelada);

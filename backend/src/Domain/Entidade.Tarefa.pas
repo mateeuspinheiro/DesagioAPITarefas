@@ -18,7 +18,7 @@ type
   public
     property Id: Integer read FId write FId;
     property Titulo: string read FTitulo write FTitulo;
-    property Descicao: string read FDescricao write FDescricao;
+    property Descricao: string read FDescricao write FDescricao;
     property Prioridade: Integer read FPrioridade write FPrioridade;
     property Status: TStatusTarefa read FStatus write FStatus;
     property DataCriacao: TDateTime read FDataCriacao write FDataCriacao;

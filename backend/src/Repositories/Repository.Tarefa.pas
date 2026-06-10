@@ -1,0 +1,226 @@
+unit Repository.Tarefa;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Generics.Collections,
+  FireDAC.Comp.Client,
+  Entidade.Tarefa,
+  Enums.Tarefa,
+  DTO.Estatisticas,
+  Factory.Connection.Contract,
+  Repository.Tarefa.Contract;
+
+type
+  TTarefaRepository = class(TInterfacedObject, ITarefaRepository)
+  private
+    FConnectionFactory: IConnectionFactory;
+
+    function MapTarefa(AQuery: TFDQuery): TTarefa;
+  public
+    constructor Create(const AConnectionFactory: IConnectionFactory);
+
+    function ListarTodas: TObjectList<TTarefa>;
+    function BuscarPorId(AId: Integer): TTarefa;
+    function Inserir(const ATitulo, ADescricao: string; APrioridade: Integer): TTarefa;
+    function AtualizarStatus(AId: Integer; const AStatus: string): TTarefa;
+    function Excluir(AId: Integer): Boolean;
+    function ObterEstatisticas: TEstatisticasDTO;
+  end;
+
+implementation
+
+{ TTarefaRepository }
+
+constructor TTarefaRepository.Create(const AConnectionFactory: IConnectionFactory);
+begin
+  inherited Create;
+  FConnectionFactory := AConnectionFactory;
+end;
+
+function TTarefaRepository.MapTarefa(AQuery: TFDQuery): TTarefa;
+begin
+  Result := TTarefa.Create;
+  Result.Id := AQuery.FieldByName('Id').AsInteger;
+  Result.Titulo := AQuery.FieldByName('Titulo').AsString;
+  Result.Descricao := AQuery.FieldByName('Descricao').AsString;
+  Result.Prioridade := AQuery.FieldByName('Prioridade').AsInteger;
+  Result.Status := StringToStatus(AQuery.FieldByName('Status').AsString);
+  Result.DataCriacao := AQuery.FieldByName('DataCriacao').AsDateTime;
+  if not AQuery.FieldByName('DataConclusao').IsNull then
+    Result.DataConclusao := AQuery.FieldByName('DataConclusao').AsDateTime;
+end;
+
+function TTarefaRepository.ListarTodas: TObjectList<TTarefa>;
+var
+  LConn: TFDConnection;
+  LQuery: TFDQuery;
+begin
+  Result := TObjectList<TTarefa>.Create(True);
+  LConn := FConnectionFactory.CreateConnection;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := LConn;
+    LQuery.SQL.Text :=
+      'SELECT Id, Titulo, Descricao, Prioridade, Status, DataCriacao, DataConclusao ' +
+      'FROM Tarefas ORDER BY Id DESC';
+    LQuery.Open;
+    while not LQuery.Eof do
+    begin
+      Result.Add(MapTarefa(LQuery));
+      LQuery.Next;
+    end;
+  finally
+    LQuery.Free;
+    LConn.Free;
+  end;
+end;
+
+function TTarefaRepository.BuscarPorId(AId: Integer): TTarefa;
+var
+  LConn: TFDConnection;
+  LQuery: TFDQuery;
+begin
+  Result := nil;
+  LConn := FConnectionFactory.CreateConnection;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := LConn;
+    LQuery.SQL.Text :=
+      'SELECT Id, Titulo, Descricao, Prioridade, Status, DataCriacao, DataConclusao ' +
+      'FROM Tarefas WHERE Id = :Id';
+    LQuery.ParamByName('Id').AsInteger := AId;
+    LQuery.Open;
+    if not LQuery.IsEmpty then
+      Result := MapTarefa(LQuery);
+  finally
+    LQuery.Free;
+    LConn.Free;
+  end;
+end;
+
+function TTarefaRepository.Inserir(const ATitulo, ADescricao: string;
+  APrioridade: Integer): TTarefa;
+var
+  LConn: TFDConnection;
+  LQuery: TFDQuery;
+  LNewId: Integer;
+begin
+  LConn := FConnectionFactory.CreateConnection;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := LConn;
+    LQuery.SQL.Text :=
+      'INSERT INTO Tarefas (Titulo, Descricao, Prioridade, Status) ' +
+      'OUTPUT INSERTED.Id VALUES (:Titulo, :Descricao, :Prioridade, :Status)';
+    LQuery.ParamByName('Titulo').AsString := ATitulo;
+    LQuery.ParamByName('Descricao').AsString := ADescricao;
+    LQuery.ParamByName('Prioridade').AsInteger := APrioridade;
+    LQuery.ParamByName('Status').AsString := StatusToString(stPendente);
+    LQuery.Open;
+    LNewId := LQuery.Fields[0].AsInteger;
+    LQuery.Close;
+    Result := BuscarPorId(LNewId);
+  finally
+    LQuery.Free;
+    LConn.Free;
+  end;
+end;
+
+function TTarefaRepository.AtualizarStatus(AId: Integer; const AStatus: string): TTarefa;
+var
+  LConn: TFDConnection;
+  LQuery: TFDQuery;
+  LStatus: TStatusTarefa;
+begin
+  if not StatusValido(AStatus) then
+    raise Exception.CreateFmt('Status inválido: %s', [AStatus]);
+
+  LStatus := StringToStatus(AStatus);
+  LConn := FConnectionFactory.CreateConnection;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := LConn;
+    if LStatus = stConcluida then
+      LQuery.SQL.Text :=
+        'UPDATE Tarefas SET Status = :Status, DataConclusao = GETDATE() WHERE Id = :Id'
+    else
+      LQuery.SQL.Text :=
+        'UPDATE Tarefas SET Status = :Status, DataConclusao = NULL WHERE Id = :Id';
+
+    LQuery.ParamByName('Status').AsString := StatusToString(LStatus);
+    LQuery.ParamByName('Id').AsInteger := AId;
+    LQuery.ExecSQL;
+
+    if LQuery.RowsAffected = 0 then
+      raise Exception.CreateFmt('Tarefa %d não encontrada.', [AId]);
+
+    Result := BuscarPorId(AId);
+  finally
+    LQuery.Free;
+    LConn.Free;
+  end;
+end;
+
+function TTarefaRepository.Excluir(AId: Integer): Boolean;
+var
+  LConn: TFDConnection;
+  LQuery: TFDQuery;
+begin
+  LConn := FConnectionFactory.CreateConnection;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := LConn;
+    LQuery.SQL.Text := 'DELETE FROM Tarefas WHERE Id = :Id';
+    LQuery.ParamByName('Id').AsInteger := AId;
+    LQuery.ExecSQL;
+    Result := LQuery.RowsAffected > 0;
+  finally
+    LQuery.Free;
+    LConn.Free;
+  end;
+end;
+
+function TTarefaRepository.ObterEstatisticas: TEstatisticasDTO;
+var
+  LConn: TFDConnection;
+  LQuery: TFDQuery;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  LConn := FConnectionFactory.CreateConnection;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := LConn;
+
+    // Total de tarefas
+    LQuery.SQL.Text := 'SELECT COUNT(*) AS Total FROM Tarefas';
+    LQuery.Open;
+    Result.TotalTarefas := LQuery.FieldByName('Total').AsInteger;
+    LQuery.Close;
+
+    // Média de prioridade das tarefas pendentes
+    LQuery.SQL.Text :=
+      'SELECT AVG(CAST(Prioridade AS FLOAT)) AS Media ' +
+      'FROM Tarefas WHERE Status = :Status';
+    LQuery.ParamByName('Status').AsString := StatusToString(stPendente);
+    LQuery.Open;
+    if not LQuery.FieldByName('Media').IsNull then
+      Result.MediaPrioridadePendentes := LQuery.FieldByName('Media').AsFloat;
+    LQuery.Close;
+
+    // Tarefas concluídas nos últimos 7 dias
+    LQuery.SQL.Text :=
+      'SELECT COUNT(*) AS Total ' +
+      'FROM Tarefas ' +
+      'WHERE Status = :Status AND DataConclusao >= DATEADD(DAY, -7, GETDATE())';
+    LQuery.ParamByName('Status').AsString := StatusToString(stConcluida);
+    LQuery.Open;
+    Result.TarefasConcluidasUltimos7Dias := LQuery.FieldByName('Total').AsInteger;
+  finally
+    LQuery.Free;
+    LConn.Free;
+  end;
+end;
+
+end.

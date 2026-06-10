@@ -100,6 +100,13 @@
         <DCCReference Include="src\Domain\Enums.Tarefa.pas"/>
         <DCCReference Include="src\Factories\Factory.Connection.pas"/>
         <DCCReference Include="src\Factories\Factory.Connection.Contract.pas"/>
+        <DCCReference Include="src\Repositories\Repository.Tarefa.Contract.pas"/>
+        <DCCReference Include="src\DTO\DTO.Tarefa.pas"/>
+        <DCCReference Include="src\DTO\DTO.Estatisticas.pas"/>
+        <DCCReference Include="src\Repositories\Repository.Tarefa.pas"/>
+        <DCCReference Include="src\Services\Service.Tarefa.pas"/>
+        <DCCReference Include="src\Middleware\MIddleware.ApiKey.pas"/>
+        <DCCReference Include="src\Controllers\Controller.Tarefa.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

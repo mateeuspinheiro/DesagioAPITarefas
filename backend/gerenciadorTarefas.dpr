@@ -5,6 +5,7 @@ program gerenciadorTarefas;
 {$R *.res}
 
 uses
+  System.SysUtils,
   Horse,
   FireDAC.DApt,
   FireDAC.Stan.Async,
@@ -13,15 +14,22 @@ uses
   Entidade.Tarefa in 'src\Domain\Entidade.Tarefa.pas',
   Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas',
   Factory.Connection in 'src\Factories\Factory.Connection.pas',
-  Factory.Connection.Contract in 'src\Factories\Factory.Connection.Contract.pas';
+  Factory.Connection.Contract in 'src\Factories\Factory.Connection.Contract.pas',
+  Repository.Tarefa.Contract in 'src\Repositories\Repository.Tarefa.Contract.pas',
+  DTO.Tarefa in 'src\DTO\DTO.Tarefa.pas',
+  DTO.Estatisticas in 'src\DTO\DTO.Estatisticas.pas',
+  Repository.Tarefa in 'src\Repositories\Repository.Tarefa.pas',
+  Service.Tarefa in 'src\Services\Service.Tarefa.pas',
+  MIddleware.ApiKey in 'src\Middleware\MIddleware.ApiKey.pas',
+  Controller.Tarefa in 'src\Controllers\Controller.Tarefa.pas';
 
 begin
   try
     Writeln('Iniciando a API do Gerenciador de Tarefas');
-    Writeln('.....');
-    Writeln('Para finalizar o serviço, pressione Ctrl+C para encerrar');
+    Writeln(Format('Porta: %d', [TAppConfig.Instance.Port]));
+    Writeln('Para finalizar o serviço, pressione Ctrl+C!');
 
-    THorse.Use({middle});
+    THorse.Use(MiddlewareApiKey);
     Registry;
 
     THorse.Listen(TAppConfig.Instance.Port);

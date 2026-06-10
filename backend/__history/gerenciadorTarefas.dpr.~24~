@@ -1,0 +1,42 @@
+program gerenciadorTarefas;
+
+{$APPTYPE CONSOLE}
+
+{$R *.res}
+
+uses
+  Horse,
+  FireDAC.DApt,
+  FireDAC.Stan.Async,
+  FireDAC.Phys.ODBC,
+  AppConfig in 'src\Config\AppConfig.pas',
+  Entidade.Tarefa in 'src\Domain\Entidade.Tarefa.pas',
+  Enums.Tarefa in 'src\Domain\Enums.Tarefa.pas',
+  Factory.Connection in 'src\Factories\Factory.Connection.pas',
+  Factory.Connection.Contract in 'src\Factories\Factory.Connection.Contract.pas',
+  Repository.Tarefa.Contract in 'src\Repositories\Repository.Tarefa.Contract.pas',
+  DTO.Tarefa in 'src\DTO\DTO.Tarefa.pas',
+  DTO.Estatisticas in 'src\DTO\DTO.Estatisticas.pas',
+  Repository.Tarefa in 'src\Repositories\Repository.Tarefa.pas',
+  Service.Tarefa in 'src\Services\Service.Tarefa.pas',
+  MIddleware.ApiKey in 'src\Middleware\MIddleware.ApiKey.pas',
+  Controller.Tarefa in 'src\Controllers\Controller.Tarefa.pas';
+
+begin
+  try
+    Writeln('Iniciando a API do Gerenciador de Tarefas');
+    Writeln('.....');
+    Writeln('Para finalizar o serviço, pressione Ctrl+C para encerrar');
+
+    THorse.Use({middle});
+    Registry;
+
+    THorse.Listen(TAppConfig.Instance.Port);
+  except
+    on E: Exception do
+    begin
+     Writeln(E.ClassName ,'', E.message);
+     Readln;
+    end;
+  end;
+end.

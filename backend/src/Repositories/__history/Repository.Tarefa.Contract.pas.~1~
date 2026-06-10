@@ -1,0 +1,7 @@
+unit Repository.Tarefa.Contract;
+
+interface
+
+implementation
+
+end.
