@@ -1,0 +1,322 @@
+unit FrmPrincipal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls,
+  Vcl.Samples.Spin, Vcl.ExtCtrls, ApiClient;
+
+type
+  TFrmMain = class(TForm)
+    pnlTop: TPanel;
+    lblUrl: TLabel;
+    lblApiKey: TLabel;
+    edtUrl: TEdit;
+    edtApiKey: TEdit;
+    btnConectar: TButton;
+    btnAtualizar: TButton;
+    pnlCenter: TPanel;
+    lvTarefas: TListView;
+    pnlRight: TPanel;
+    gbNovaTarefa: TGroupBox;
+    lblTitulo: TLabel;
+    lblDescricao: TLabel;
+    lblPrioridade: TLabel;
+    edtTitulo: TEdit;
+    memDescricao: TMemo;
+    spnPrioridade: TSpinEdit;
+    btnAdicionar: TButton;
+    gbAcao: TGroupBox;
+    lblStatus: TLabel;
+    cboStatus: TComboBox;
+    btnAtualizarStatus: TButton;
+    btnRemover: TButton;
+    gbEstatisticas: TGroupBox;
+    lblTotal: TLabel;
+    lblMedia: TLabel;
+    lblConcluidas: TLabel;
+    lblTotalValor: TLabel;
+    lblMediaValor: TLabel;
+    lblConcluidasValor: TLabel;
+    btnEstatisticas: TButton;
+    StatusBar: TStatusBar;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnConectarClick(Sender: TObject);
+    procedure btnAtualizarClick(Sender: TObject);
+    procedure btnAdicionarClick(Sender: TObject);
+    procedure btnAtualizarStatusClick(Sender: TObject);
+    procedure btnRemoverClick(Sender: TObject);
+
+  private
+    FApiClient: TApiClient;
+    procedure ConfigurarListView;
+    procedure ConfigurarStatusCombo;
+    procedure ExibirErro(const AOperacao: string);
+    function TarefaSelecionadaId: Integer;
+    procedure CarregarEstatisticas;
+    procedure CarregarTarefas;
+    procedure LimparFormulario;
+    procedure lvTarefasSelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmMain: TFrmMain;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmMain.FormCreate(Sender: TObject);
+begin
+  FApiClient := TApiClient.Create;
+  edtUrl.Text := 'http://localhost:9000';
+  edtApiKey.Text := 'desafio-tarefas-api-key';
+
+  ConfigurarListView;
+  ConfigurarStatusCombo;
+end;
+
+procedure TFrmMain.FormDestroy(Sender: TObject);
+begin
+  FApiClient.Free;
+end;
+
+procedure TFrmMain.ConfigurarListView;
+begin
+  lvTarefas.ViewStyle := vsReport;
+  lvTarefas.RowSelect := True;
+  lvTarefas.ReadOnly := True;
+  lvTarefas.Columns.Clear;
+  with lvTarefas.Columns.Add do
+  begin
+    Caption := 'ID';
+    Width := 40;
+  end;
+  with lvTarefas.Columns.Add do
+  begin
+    Caption := 'Título';
+    Width := 180;
+  end;
+  with lvTarefas.Columns.Add do
+  begin
+    Caption := 'Prioridade';
+    Width := 70;
+  end;
+  with lvTarefas.Columns.Add do
+  begin
+    Caption := 'Status';
+    Width := 100;
+  end;
+  with lvTarefas.Columns.Add do
+  begin
+    Caption := 'Criação';
+    Width := 130;
+  end;
+end;
+
+procedure TFrmMain.ConfigurarStatusCombo;
+begin
+  cboStatus.Items.Clear;
+  cboStatus.Items.Add('Pendente');
+  cboStatus.Items.Add('EmAndamento');
+  cboStatus.Items.Add('Concluida');
+  cboStatus.Items.Add('Cancelada');
+  cboStatus.ItemIndex := 0;
+end;
+
+procedure TFrmMain.ExibirErro(const AOperacao: string);
+begin
+  StatusBar.SimpleText := Format('Erro em %s: %s', [AOperacao, TApiClient.UltimoErro]);
+  MessageDlg(Format('Não foi possível %s.'#13#10#13#10'%s',
+    [AOperacao, TApiClient.UltimoErro]), mtError, [mbOK], 0);
+end;
+
+function TFrmMain.TarefaSelecionadaId: Integer;
+begin
+  Result := 0;
+  if Assigned(lvTarefas.Selected) then
+    Result := StrToIntDef(lvTarefas.Selected.Caption, 0);
+end;
+
+procedure TFrmMain.CarregarTarefas;
+var
+  LTarefas: TArray<TTarefaItem>;
+  I: Integer;
+  LItem: TListItem;
+begin
+  lvTarefas.Items.BeginUpdate;
+  try
+    lvTarefas.Items.Clear;
+    if FApiClient.ListarTarefas(LTarefas) then
+    begin
+      for I := 0 to High(LTarefas) do
+      begin
+        LItem := lvTarefas.Items.Add;
+        LItem.Caption := IntToStr(LTarefas[I].Id);
+        LItem.SubItems.Add(LTarefas[I].Titulo);
+        LItem.SubItems.Add(IntToStr(LTarefas[I].Prioridade));
+        LItem.SubItems.Add(LTarefas[I].Status);
+        LItem.SubItems.Add(LTarefas[I].DataCriacao);
+      end;
+      StatusBar.SimpleText := Format('%d tarefa(s) carregada(s).', [Length(LTarefas)]);
+    end
+    else
+      ExibirErro('carregar tarefas');
+  finally
+    lvTarefas.Items.EndUpdate;
+  end;
+end;
+
+procedure TFrmMain.CarregarEstatisticas;
+var
+  LStats: TEstatisticasItem;
+begin
+  if FApiClient.ObterEstatisticas(LStats) then
+  begin
+    lblTotalValor.Caption := IntToStr(LStats.TotalTarefas);
+    lblMediaValor.Caption := FormatFloat('0.00', LStats.MediaPrioridadePendentes);
+    lblConcluidasValor.Caption := IntToStr(LStats.TarefasConcluidasUltimos7Dias);
+  end
+  else
+    ExibirErro('obter estatísticas');
+end;
+
+procedure TFrmMain.LimparFormulario;
+begin
+  edtTitulo.Clear;
+  memDescricao.Clear;
+  spnPrioridade.Value := 3;
+end;
+
+
+
+procedure TFrmMain.btnAdicionarClick(Sender: TObject);
+var
+  LTarefa: TTarefaItem;
+begin
+  if Trim(edtTitulo.Text) = '' then
+  begin
+    MessageDlg('Informe o título da tarefa.', mtWarning, [mbOK], 0);
+    edtTitulo.SetFocus;
+    Exit;
+  end;
+
+  FApiClient.BaseURL := Trim(edtUrl.Text);
+  FApiClient.ApiKey := Trim(edtApiKey.Text);
+
+  if FApiClient.AdicionarTarefa(Trim(edtTitulo.Text), memDescricao.Text,
+    spnPrioridade.Value, LTarefa) then
+  begin
+    LimparFormulario;
+    CarregarTarefas;
+    CarregarEstatisticas;
+    StatusBar.SimpleText := 'Tarefa adicionada com sucesso.';
+  end
+  else
+    ExibirErro('adicionar tarefa');
+end;
+
+procedure TFrmMain.btnAtualizarClick(Sender: TObject);
+begin
+  FApiClient.BaseURL := Trim(edtUrl.Text);
+  FApiClient.ApiKey := Trim(edtApiKey.Text);
+  CarregarTarefas;
+  CarregarEstatisticas;
+end;
+
+
+
+procedure TFrmMain.btnAtualizarStatusClick(Sender: TObject);
+var
+  LId: Integer;
+  LTarefa: TTarefaItem;
+begin
+  LId := TarefaSelecionadaId;
+  if LId = 0 then
+  begin
+    MessageDlg('Selecione uma tarefa na lista.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  FApiClient.BaseURL := Trim(edtUrl.Text);
+  FApiClient.ApiKey := Trim(edtApiKey.Text);
+
+  if FApiClient.AtualizarStatus(LId, cboStatus.Text, LTarefa) then
+  begin
+    CarregarTarefas;
+    CarregarEstatisticas;
+    StatusBar.SimpleText := Format('Status da tarefa %d atualizado.', [LId]);
+  end
+  else
+    ExibirErro('atualizar status');
+end;
+
+procedure TFrmMain.btnConectarClick(Sender: TObject);
+begin
+  FApiClient.BaseURL := Trim(edtUrl.Text);
+  FApiClient.ApiKey := Trim(edtApiKey.Text);
+
+  if not FApiClient.TestarConexao then
+  begin
+    ExibirErro('conectar ao serviço (GET /ping)');
+    Exit;
+  end;
+
+  StatusBar.SimpleText := 'Serviço online. Carregando dados...';
+  CarregarTarefas;
+  CarregarEstatisticas;
+end;
+
+
+
+
+procedure TFrmMain.btnRemoverClick(Sender: TObject);
+var
+  LId: Integer;
+begin
+  LId := TarefaSelecionadaId;
+  if LId = 0 then
+  begin
+    MessageDlg('Selecione uma tarefa na lista.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  if MessageDlg(Format('Deseja remover a tarefa %d?', [LId]),
+    mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    Exit;
+
+  FApiClient.BaseURL := Trim(edtUrl.Text);
+  FApiClient.ApiKey := Trim(edtApiKey.Text);
+
+  if FApiClient.RemoverTarefa(LId) then
+  begin
+    CarregarTarefas;
+    CarregarEstatisticas;
+    StatusBar.SimpleText := Format('Tarefa %d removida.', [LId]);
+  end
+  else
+    ExibirErro('remover tarefa');
+end;
+
+procedure TFrmMain.lvTarefasSelectItem(Sender: TObject; Item: TListItem;
+  Selected: Boolean);
+var
+  LStatus: string;
+  I: Integer;
+begin
+  if not Selected then
+    Exit;
+
+  LStatus := Item.SubItems[2];
+  I := cboStatus.Items.IndexOf(LStatus);
+  if I >= 0 then
+    cboStatus.ItemIndex := I;
+end;
+
+end.

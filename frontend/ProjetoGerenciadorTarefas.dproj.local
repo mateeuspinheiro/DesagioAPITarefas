@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2026/06/09 22:20:33.408,=C:\Users\Pinheiro\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2026/06/09 22:25:55.636,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\frontend\FrmPrincipal.dfm=C:\Users\Pinheiro\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2026/06/09 22:25:55.636,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\frontend\FrmPrincipal.pas=C:\Users\Pinheiro\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2026/06/09 22:26:33.562,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\frontend\ProjetoGerenciadorTarefas.dproj=C:\Users\Pinheiro\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2026/06/09 22:28:34.483,=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\frontend\Unit1.pas</Transaction>
+    <Transaction>2026/06/09 22:29:04.406,C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\frontend\src\Services\ApiClient.pas=C:\Users\Pinheiro\Desktop\DesafioBDMG\DesafioAPITarefas\frontend\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>

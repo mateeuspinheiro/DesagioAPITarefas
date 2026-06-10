@@ -26,3 +26,4 @@ BEGIN
     CREATE INDEX IX_Tarefas_Status ON dbo.Tarefas (Status);
     CREATE INDEX IX_Tarefas_DataConclusao ON dbo.Tarefas (DataConclusao);
 END
+

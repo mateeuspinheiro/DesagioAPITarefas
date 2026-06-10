@@ -1,0 +1,289 @@
+unit ApiClient;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Classes,
+  System.JSON,
+  REST.Client,
+  REST.Types;
+
+type
+  TTarefaItem = record
+    Id: Integer;
+    Titulo: string;
+    Descricao: string;
+    Prioridade: Integer;
+    Status: string;
+    DataCriacao: string;
+    DataConclusao: string;
+  end;
+
+  TEstatisticasItem = record
+    TotalTarefas: Integer;
+    MediaPrioridadePendentes: Double;
+    TarefasConcluidasUltimos7Dias: Integer;
+  end;
+
+  TApiClient = class
+    private
+      FRESTClient: TRESTClient;
+      FRESTRequest: TRESTRequest;
+      FRESTResponse: TRESTResponse;
+      FBaseURL: string;
+      FApiKey: string;
+    procedure ConfigurarRequisicao(const AResource: string;
+      AMethod: TRESTRequestMethod);
+    procedure ValidarResposta;
+    function ParseTarefa(AJson: TJSONObject): TTarefaItem;
+    public
+    function TestarConexao: Boolean;
+    class function UltimoErro: string; static;
+    function ListarTarefas(out ATarefas: TArray<TTarefaItem>): Boolean;
+    function AdicionarTarefa(const ATitulo, ADescricao: string;
+      APrioridade: Integer; out ATarefa: TTarefaItem): Boolean;
+    function AtualizarStatus(AId: Integer; const AStatus: string;
+      out ATarefa: TTarefaItem): Boolean;
+    function ObterEstatisticas(out AStats: TEstatisticasItem): Boolean;
+    function RemoverTarefa(AId: Integer): Boolean;v
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+implementation
+
+var
+  GUltimoErro: string;
+
+constructor TApiClient.Create;
+begin
+  inherited;
+  FRESTClient  := TRESTClient.Create(nil);
+  FRESTRequest := TRESTRequest.Create(nil);
+  FRESTResponse:= TRESTResponse.Create(nil);
+
+  FRESTRequest.Client        := FRESTClient;
+  FRESTRequest.Response      := FRESTResponse;
+  FRESTRequest.Accept        := 'application/json';
+  FRESTRequest.AcceptCharset := 'utf-8'
+end;
+
+destructor TApiClient.Destroy;
+begin
+  FRESTResponse.Free;
+  FRESTRequest.Free;
+  FRESTClient.Free;
+  inherited;
+end;
+
+procedure TApiClient.ConfigurarRequisicao(const AResource: string;
+  AMethod: TRESTRequestMethod);
+begin
+  FRESTClient.BaseURL := FBaseURL;
+  FRESTRequest.Resource := AResource;
+  FRESTRequest.Method := AMethod;
+  FRESTRequest.Body.ClearBody;
+  FRESTRequest.Params.Clear;
+  FRESTRequest.AddParameter('X-API-Key', FApiKey, pkHTTPHEADER);
+end;
+
+procedure TApiClient.ValidarResposta;
+var
+  LJson: TJSONObject;
+begin
+  if FRESTResponse.StatusCode in [200, 201, 204] then
+    Exit;
+
+  GUltimoErro := Format('HTTP %d: %s', [FRESTResponse.StatusCode, FRESTResponse.Content]);
+
+  if FRESTResponse.Content <> '' then
+  begin
+    LJson := TJSONObject.ParseJSONValue(FRESTResponse.Content) as TJSONObject;
+    if Assigned(LJson) then
+    try
+      if Assigned(LJson.GetValue('erro')) then
+        GUltimoErro := LJson.GetValue('erro').Value;
+    finally
+      LJson.Free;
+    end;
+  end;
+
+  raise Exception.Create(GUltimoErro);
+end;
+
+
+function TApiClient.ParseTarefa(AJson: TJSONObject): TTarefaItem;
+begin
+  Result.Id := StrToIntDef(AJson.GetValue('id').Value, 0);
+  Result.Titulo := AJson.GetValue('titulo').Value;
+  Result.Descricao := AJson.GetValue('descricao').Value;
+  Result.Prioridade := StrToIntDef(AJson.GetValue('prioridade').Value, 1);
+  Result.Status := AJson.GetValue('status').Value;
+  Result.DataCriacao := AJson.GetValue('dataCriacao').Value;
+  if Assigned(AJson.GetValue('dataConclusao')) and not (AJson.GetValue('dataConclusao') is TJSONNull) then
+    Result.DataConclusao := AJson.GetValue('dataConclusao').Value
+  else
+    Result.DataConclusao := '';
+end;
+
+class function TApiClient.UltimoErro: string;
+begin
+  Result := GUltimoErro;
+end;
+
+function TApiClient.TestarConexao: Boolean;
+begin
+  Result := False;
+  try
+    ConfigurarRequisicao('/ping', rmGET);
+    FRESTRequest.Execute;
+    ValidarResposta;
+    Result := True;
+  except
+    on E: Exception do
+      GUltimoErro := E.Message;
+  end;
+end;
+
+function TApiClient.ListarTarefas(out ATarefas: TArray<TTarefaItem>): Boolean;
+var
+  LJson: TJSONValue;
+  LArray: TJSONArray;
+  I: Integer;
+begin
+  Result := False;
+  SetLength(ATarefas, 0);
+  try
+    ConfigurarRequisicao('/api/tarefas', rmGET);
+    FRESTRequest.Execute;
+    ValidarResposta;
+
+    LJson := TJSONObject.ParseJSONValue(FRESTResponse.Content);
+    try
+      if not (LJson is TJSONArray) then
+        raise Exception.Create('Resposta inválida do servidor.');
+
+      LArray := TJSONArray(LJson);
+      SetLength(ATarefas, LArray.Count);
+      for I := 0 to LArray.Count - 1 do
+        ATarefas[I] := ParseTarefa(LArray.Items[I] as TJSONObject);
+      Result := True;
+    finally
+      LJson.Free;
+    end;
+  except
+    on E: Exception do
+      GUltimoErro := E.Message;
+  end;
+end;
+
+function TApiClient.AdicionarTarefa(const ATitulo, ADescricao: string;
+  APrioridade: Integer; out ATarefa: TTarefaItem): Boolean;
+var
+  LBody: TJSONObject;
+begin
+  Result := False;
+  try
+    ConfigurarRequisicao('/api/tarefas', rmPOST);
+
+    LBody := TJSONObject.Create;
+    try
+      LBody.AddPair('titulo', ATitulo);
+      LBody.AddPair('descricao', ADescricao);
+      LBody.AddPair('prioridade', TJSONNumber.Create(APrioridade));
+      FRESTRequest.AddBody(LBody.ToJSON, ctAPPLICATION_JSON);
+    finally
+      LBody.Free;
+    end;
+
+    FRESTRequest.Execute;
+    ValidarResposta;
+    LBody := TJSONObject.ParseJSONValue(FRESTResponse.Content) as TJSONObject;
+    try
+      ATarefa := ParseTarefa(LBody);
+      Result := True;
+    finally
+      LBody.Free;
+    end;
+  except
+    on E: Exception do
+      GUltimoErro := E.Message;
+  end;
+end;
+
+function TApiClient.AtualizarStatus(AId: Integer; const AStatus: string;
+  out ATarefa: TTarefaItem): Boolean;
+var
+  LBody: TJSONObject;
+begin
+  Result := False;
+  try
+    ConfigurarRequisicao(Format('/api/tarefas/%d/status', [AId]), rmPUT);
+
+    LBody := TJSONObject.Create;
+    try
+      LBody.AddPair('status', AStatus);
+      FRESTRequest.AddBody(LBody.ToJSON, ctAPPLICATION_JSON);
+    finally
+      LBody.Free;
+    end;
+
+    FRESTRequest.Execute;
+    ValidarResposta;
+    LBody := TJSONObject.ParseJSONValue(FRESTResponse.Content) as TJSONObject;
+    try
+      ATarefa := ParseTarefa(LBody);
+      Result := True;
+    finally
+      LBody.Free;
+    end;
+  except
+    on E: Exception do
+      GUltimoErro := E.Message;
+  end;
+end;
+
+function TApiClient.RemoverTarefa(AId: Integer): Boolean;
+begin
+  Result := False;
+  try
+    ConfigurarRequisicao(Format('/api/tarefas/%d', [AId]), rmDELETE);
+    FRESTRequest.Execute;
+    ValidarResposta;
+    Result := True;
+  except
+    on E: Exception do
+      GUltimoErro := E.Message;
+  end;
+end;
+
+function TApiClient.ObterEstatisticas(out AStats: TEstatisticasItem): Boolean;
+var
+  LJson: TJSONObject;
+begin
+  Result := False;
+  FillChar(AStats, SizeOf(AStats), 0);
+  try
+    ConfigurarRequisicao('/api/estatisticas', rmGET);
+    FRESTRequest.Execute;
+    ValidarResposta;
+
+    LJson := TJSONObject.ParseJSONValue(FRESTResponse.Content) as TJSONObject;
+    try
+      AStats.TotalTarefas := StrToIntDef(LJson.GetValue('totalTarefas').Value, 0);
+      AStats.MediaPrioridadePendentes := StrToFloatDef(
+        StringReplace(LJson.GetValue('mediaPrioridadePendentes').Value, '.', FormatSettings.DecimalSeparator, []), 0);
+      AStats.TarefasConcluidasUltimos7Dias :=
+        StrToIntDef(LJson.GetValue('tarefasConcluidasUltimos7Dias').Value, 0);
+      Result := True;
+    finally
+      LJson.Free;
+    end;
+  except
+    on E: Exception do
+      GUltimoErro := E.Message;
+  end;
+end;
+
+end.
