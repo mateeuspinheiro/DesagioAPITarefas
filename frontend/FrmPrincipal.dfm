@@ -92,8 +92,6 @@ object FrmMain: TFrmMain
       ReadOnly = True
       TabOrder = 0
       ViewStyle = vsReport
-      ExplicitLeft = 2
-      ExplicitTop = -6
     end
   end
   object pnlRight: TPanel

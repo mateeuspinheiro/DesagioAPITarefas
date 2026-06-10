@@ -19,8 +19,8 @@ function StatusToString(AStatus : TStatusTarefa): string;
 begin
   case AStatus of
     stPendente:    Result := 'Pendente';
-    stEmAndamento: Result := 'Em Andamento';
-    stConcluida:   Result := 'Concluída';
+    stEmAndamento: Result := 'EmAndamento';
+    stConcluida:   Result := 'Concluida';
     stCancelada:   Result := 'Cancelada';
   else
    Result := 'Pendente';
@@ -46,8 +46,8 @@ end;
 function StatusValido(const AValue: string): Boolean;
 begin
   Result:= SameText(AValue, 'Pendente')
-    or SameText(AValue, 'Em Andamento')
-    or SameText(AValue, 'Concluída')
+    or SameText(AValue, 'EmAndamento')
+    or SameText(AValue, 'Concluida')
     or SameText(AValue, 'Cancelada');
 end;
 

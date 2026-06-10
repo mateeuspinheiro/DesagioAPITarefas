@@ -1,0 +1,80 @@
+unit Service.Tarefa;
+
+interface
+
+uses
+  System.Generics.Collections,
+  System.SysUtils,
+  Entidade.Tarefa,
+  DTO.Estatisticas,
+  Repository.Tarefa.Contract;
+
+type
+  TTarefaService = class
+    private
+      FRepository: ITarefaRepository;
+
+    public
+      constructor Create(const ARepository: ITarefaRepository);
+      function ListarTodas: TObjectList<TTarefa>;
+      function Adicionar(const ATitulo, ADescricao: string;
+        APrioridade: Integer): TTarefa;
+      function AtualizarStatus(AId: Integer; const AStatus: string): TTarefa;
+      function Excluir(AId: Integer): Boolean;
+      function ObterEstatisticas: TEstatisticasDTO;
+  end;
+
+implementation
+
+uses
+  Enums.Tarefa;
+
+constructor TTarefaService.Create(const ARepository: ITarefaRepository);
+begin
+  inherited Create;
+  FRepository := ARepository;
+end;
+
+function TTarefaService.ListarTodas: TObjectList<TTarefa>;
+begin
+  Result := FRepository.ListarTodas;
+end;
+
+function TTarefaService.Adicionar(const ATitulo, ADescricao: string;
+  APrioridade: Integer): TTarefa;
+begin
+  if Trim(ATitulo) = '' then
+    raise Exception.Create('O título da tarefa não pode ser nullo!');
+
+  if (APrioridade < 1) then
+    raise Exception.Create('A prioridade deve estar entre 1 e 5!');
+
+  Result := FRepository.Inserir(Trim(ATitulo),Trim(ADescricao),APrioridade);
+end;
+
+function TTarefaService.AtualizarStatus(AId: Integer; const AStatus: string): TTarefa;
+begin
+  if AId <= 0 then
+    raise Exception.Create('O código identificador da Tarefa é inválido');
+
+  if not StatusValido(AStatus) then
+    raise Exception.CreateFmt('Status da tarefa inválido : %s',[AStatus]);
+
+end;
+
+function TTarefaService.Excluir(AId: Integer): Boolean;
+begin
+  if AId <= 0  then
+    raise Exception.Create('O código identificador da Tarefa é inválido');
+
+  Result:= FRepository.Excluir(AId);
+  if not Result then
+    raise Exception.CreateFmt('Tarefa %d não encotrada!',[AId]);
+end;
+
+function TTarefaService.ObterEstatisticas: TEstatisticasDTO;
+begin
+  Result:= FRepository.ObterEstatisticas;
+end;
+
+end.

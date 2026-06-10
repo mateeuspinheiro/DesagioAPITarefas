@@ -60,6 +60,7 @@ begin
   if not StatusValido(AStatus) then
     raise Exception.CreateFmt('Status da tarefa inválido : %s',[AStatus]);
 
+  Result := FRepository.AtualizarStatus(AId, AStatus);
 end;
 
 function TTarefaService.Excluir(AId: Integer): Boolean;
